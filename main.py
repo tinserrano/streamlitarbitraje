@@ -137,40 +137,76 @@ try:
                 })
     exchanges_venta_usdt.sort(key=lambda x: x['bid'], reverse=True)
     
+    # Mostrar mejores opciones para comprar USDT (con USD)
+    st.markdown("---")
+    st.subheader("💱 Mejores opciones para comprar USDT (con USD)")
+    col1, col2, col3 = st.columns(3)
+    
+    if len(exchanges_compra_usdt) >= 1:
+        with col1:
+            st.metric(
+                f"1º {exchanges_compra_usdt[0]['exchange']}", 
+                f"${exchanges_compra_usdt[0]['ask']:.4f} USD/USDT"
+            )
+    
+    if len(exchanges_compra_usdt) >= 2:
+        with col2:
+            st.metric(
+                f"2º {exchanges_compra_usdt[1]['exchange']}", 
+                f"${exchanges_compra_usdt[1]['ask']:.4f} USD/USDT"
+            )
+    
+    if len(exchanges_compra_usdt) >= 3:
+        with col3:
+            st.metric(
+                f"3º {exchanges_compra_usdt[2]['exchange']}", 
+                f"${exchanges_compra_usdt[2]['ask']:.4f} USD/USDT"
+            )
+    
+    # Mostrar mejores opciones para vender USDT (por ARS)
+    st.markdown("---")
+    st.subheader("📤 Mejores opciones para vender USDT (por ARS)")
+    col1, col2, col3 = st.columns(3)
+    
+    if len(exchanges_venta_usdt) >= 1:
+        with col1:
+            st.metric(
+                f"1º {exchanges_venta_usdt[0]['exchange']}", 
+                f"${exchanges_venta_usdt[0]['bid']:,.2f} ARS/USDT"
+            )
+    
+    if len(exchanges_venta_usdt) >= 2:
+        with col2:
+            st.metric(
+                f"2º {exchanges_venta_usdt[1]['exchange']}", 
+                f"${exchanges_venta_usdt[1]['bid']:,.2f} ARS/USDT"
+            )
+    
+    if len(exchanges_venta_usdt) >= 3:
+        with col3:
+            st.metric(
+                f"3º {exchanges_venta_usdt[2]['exchange']}", 
+                f"${exchanges_venta_usdt[2]['bid']:,.2f} ARS/USDT"
+            )
+    
     # Calcular todas las combinaciones
     resultados = []
     
-    # Combinaciones con el proveedor más barato de USD
-    if len(proveedores_usd) >= 1:
-        if len(exchanges_compra_usdt) >= 1 and len(exchanges_venta_usdt) >= 1:
-            resultados.append({
-                'titulo': f'Opción 1: {proveedores_usd[0]["prettyName"]} + Mejor USDT compra/venta',
-                **calcular_arbitraje(capital_inicial_ars, proveedores_usd[0],
-                                   exchanges_compra_usdt[0], exchanges_venta_usdt[0])
-            })
-        
-        if len(exchanges_compra_usdt) >= 1 and len(exchanges_venta_usdt) >= 2:
-            resultados.append({
-                'titulo': f'Opción 2: {proveedores_usd[0]["prettyName"]} + Mejor USDT compra/2do venta',
-                **calcular_arbitraje(capital_inicial_ars, proveedores_usd[0],
-                                   exchanges_compra_usdt[0], exchanges_venta_usdt[1])
-            })
+    # Generar más combinaciones - usar los 2 mejores proveedores USD y los 3 mejores exchanges compra/venta
+    num_proveedores = min(2, len(proveedores_usd))
+    num_compra = min(2, len(exchanges_compra_usdt))
+    num_venta = min(3, len(exchanges_venta_usdt))
     
-    # Combinaciones con el segundo proveedor más barato de USD
-    if len(proveedores_usd) >= 2:
-        if len(exchanges_compra_usdt) >= 1 and len(exchanges_venta_usdt) >= 1:
-            resultados.append({
-                'titulo': f'Opción 3: {proveedores_usd[1]["prettyName"]} + Mejor USDT compra/venta',
-                **calcular_arbitraje(capital_inicial_ars, proveedores_usd[1],
-                                   exchanges_compra_usdt[0], exchanges_venta_usdt[0])
-            })
-        
-        if len(exchanges_compra_usdt) >= 1 and len(exchanges_venta_usdt) >= 2:
-            resultados.append({
-                'titulo': f'Opción 4: {proveedores_usd[1]["prettyName"]} + Mejor USDT compra/2do venta',
-                **calcular_arbitraje(capital_inicial_ars, proveedores_usd[1],
-                                   exchanges_compra_usdt[0], exchanges_venta_usdt[1])
-            })
+    contador = 1
+    for i in range(num_proveedores):
+        for j in range(num_compra):
+            for k in range(num_venta):
+                resultados.append({
+                    'titulo': f'Opción {contador}: {proveedores_usd[i]["prettyName"]} → {exchanges_compra_usdt[j]["exchange"]} → {exchanges_venta_usdt[k]["exchange"]}',
+                    **calcular_arbitraje(capital_inicial_ars, proveedores_usd[i],
+                                       exchanges_compra_usdt[j], exchanges_venta_usdt[k])
+                })
+                contador += 1
     
     # Mostrar resultados
     st.markdown("---")
@@ -235,7 +271,23 @@ try:
         df_proveedores = pd.DataFrame(proveedores_usd)
         df_proveedores = df_proveedores[['prettyName', 'ask', 'bid', 'is24x7']]
         df_proveedores.columns = ['Proveedor', 'Compra (Ask)', 'Venta (Bid)', '24/7']
+        df_proveedores['Compra (Ask)'] = df_proveedores['Compra (Ask)'].apply(lambda x: f"${x:,.2f}")
+        df_proveedores['Venta (Bid)'] = df_proveedores['Venta (Bid)'].apply(lambda x: f"${x:,.2f}")
         st.dataframe(df_proveedores, use_container_width=True, hide_index=True)
+    
+    # NUEVO: Mostrar todos los exchanges para comprar USDT
+    with st.expander("Ver todos los exchanges para comprar USDT (con USD)"):
+        df_compra_usdt = pd.DataFrame(exchanges_compra_usdt)
+        df_compra_usdt.columns = ['Exchange', 'Precio Ask (USD/USDT)']
+        df_compra_usdt['Precio Ask (USD/USDT)'] = df_compra_usdt['Precio Ask (USD/USDT)'].apply(lambda x: f"${x:.6f}")
+        st.dataframe(df_compra_usdt, use_container_width=True, hide_index=True)
+    
+    # NUEVO: Mostrar todos los exchanges para vender USDT
+    with st.expander("Ver todos los exchanges para vender USDT (por ARS)"):
+        df_venta_usdt = pd.DataFrame(exchanges_venta_usdt)
+        df_venta_usdt.columns = ['Exchange', 'Precio Bid (ARS/USDT)']
+        df_venta_usdt['Precio Bid (ARS/USDT)'] = df_venta_usdt['Precio Bid (ARS/USDT)'].apply(lambda x: f"${x:,.2f}")
+        st.dataframe(df_venta_usdt, use_container_width=True, hide_index=True)
 
 except Exception as e:
     st.error(f"Error al obtener datos: {str(e)}")
