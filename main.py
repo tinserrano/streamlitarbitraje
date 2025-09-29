@@ -11,7 +11,7 @@ st.markdown("---")
 # Exchanges argentinos
 EXCHANGES_ARGENTINOS = [
     'decrypto', 'binancep2p', 'tiendacrypto', 'buenbit', 
-    'letsbit', 'fiwind', 'belo', 'satoshitango'
+    'letsbit', 'fiwind', 'belo', 'satoshitango','lemoncash','cocos','astropay'
 ]
 
 # Sidebar para configuración
