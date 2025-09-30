@@ -15,46 +15,46 @@ EXCHANGES_ARGENTINOS = [
 ]
 
  # Mostrar resultados
-    st.markdown("---")
-    st.header("📊 Análisis de Opciones")
+st.markdown("---")
+st.header("📊 Análisis de Opciones")
+
+df_resultados = pd.DataFrame(resultados)
+df_resultados = df_resultados.sort_values('ganancia', ascending=False)
+
+# Mostrar mejor opción destacada
+mejor = df_resultados.iloc[0]
+
+col1, col2 = st.columns([2, 1])
+with col1:
+    st.success(f"### 🏆 {mejor['titulo']}")
+with col2:
+    st.metric(
+        "Ganancia/Pérdida", 
+        f"${mejor['ganancia']:,.2f}",
+        f"{mejor['porcentaje']:.2f}%"
+    )
+
+# Detalles de la mejor opción
+with st.expander("Ver detalles de la operación", expanded=True):
+    col1, col2, col3 = st.columns(3)
     
-    df_resultados = pd.DataFrame(resultados)
-    df_resultados = df_resultados.sort_values('ganancia', ascending=False)
-    
-    # Mostrar mejor opción destacada
-    mejor = df_resultados.iloc[0]
-    
-    col1, col2 = st.columns([2, 1])
     with col1:
-        st.success(f"### 🏆 {mejor['titulo']}")
-    with col2:
-        st.metric(
-            "Ganancia/Pérdida", 
-            f"${mejor['ganancia']:,.2f}",
-            f"{mejor['porcentaje']:.2f}%"
-        )
+        st.markdown(f"**📥 PASO 1: Comprar USD**")
+        st.write(f"🏦 En: **{mejor['proveedor_usd']}**")
+        st.write(f"💵 Precio: ${mejor['precio_usd']:,.2f} ARS/USD")
+        st.write(f"📊 USD comprados: ${mejor['usd_comprados']:,.2f}")
     
-    # Detalles de la mejor opción
-    with st.expander("Ver detalles de la operación", expanded=True):
-        col1, col2, col3 = st.columns(3)
-        
-        with col1:
-            st.markdown(f"**📥 PASO 1: Comprar USD**")
-            st.write(f"🏦 En: **{mejor['proveedor_usd']}**")
-            st.write(f"💵 Precio: ${mejor['precio_usd']:,.2f} ARS/USD")
-            st.write(f"📊 USD comprados: ${mejor['usd_comprados']:,.2f}")
-        
-        with col2:
-            st.markdown(f"**💱 PASO 2: Comprar USDT**")
-            st.write(f"🏦 En: **{mejor['compra_exchange']}**")
-            st.write(f"💵 Precio: ${mejor['ask_usdt']:.4f} USD/USDT")
-            st.write(f"📊 USDT: {mejor['usdt_comprados']:,.4f}")
-        
-        with col3:
-            st.markdown(f"**📤 PASO 3: Vender USDT**")
-            st.write(f"🏦 En: **{mejor['venta_exchange']}**")
-            st.write(f"💵 Precio: ${mejor['bid_ars']:,.2f} ARS/USDT")
-            st.write(f"📊 ARS finales: ${mejor['ars_finales']:,.2f}")
+    with col2:
+        st.markdown(f"**💱 PASO 2: Comprar USDT**")
+        st.write(f"🏦 En: **{mejor['compra_exchange']}**")
+        st.write(f"💵 Precio: ${mejor['ask_usdt']:.4f} USD/USDT")
+        st.write(f"📊 USDT: {mejor['usdt_comprados']:,.4f}")
+    
+    with col3:
+        st.markdown(f"**📤 PASO 3: Vender USDT**")
+        st.write(f"🏦 En: **{mejor['venta_exchange']}**")
+        st.write(f"💵 Precio: ${mejor['bid_ars']:,.2f} ARS/USDT")
+        st.write(f"📊 ARS finales: ${mejor['ars_finales']:,.2f}")
 
 
 
